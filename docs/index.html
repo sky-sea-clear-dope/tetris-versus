@@ -189,6 +189,12 @@
       <button id="btn-join" style="width:100%">参加する</button>
     </div>
 
+    <div class="card">
+      <label>相手がいないとき</label>
+      <button id="btn-solo" style="width:100%">ひとりで遊ぶ</button>
+      <p class="sub" id="solo-best" style="margin:10px 0 0;text-align:center"></p>
+    </div>
+
     <div class="status"><span id="dot" class="dot"></span><span id="status-text">未接続</span></div>
 
     <button id="btn-settings" class="link">サーバー設定</button>
@@ -203,7 +209,8 @@
       ・T-Spin、連続消し（REN）、テトリスで威力アップ<br>
       ・相手から届いたおじゃまは、自分が消せば打ち消せます<br>
       ・ただし4秒たつと問答無用でせり上がります（カウントダウンが出ます）<br>
-      ・全消し（パーフェクトクリア）は特大の10段
+      ・全消し（パーフェクトクリア）は特大の10段<br>
+      ・「ひとりで遊ぶ」は10ライン消すごとに落下が速くなるマラソンです
     </div>
   </div>
 </section>
@@ -230,7 +237,7 @@
   <div class="game-main">
     <div class="side">
       <div class="side-box"><div class="cap">HOLD</div><canvas id="c-hold" width="60" height="40"></canvas></div>
-      <div class="side-box" style="flex:1"><div class="cap">おじゃま</div><div id="gauge" class="gauge"></div></div>
+      <div class="side-box" id="box-gauge" style="flex:1"><div class="cap">おじゃま</div><div id="gauge" class="gauge"></div></div>
     </div>
     <div class="board-wrap">
       <canvas id="c-board"></canvas>
@@ -244,7 +251,7 @@
     </div>
     <div class="side">
       <div class="side-box"><div class="cap">NEXT</div><canvas id="c-next" width="60" height="170"></canvas></div>
-      <div class="side-box"><div class="cap">相手</div><canvas id="c-peer" width="60" height="120"></canvas></div>
+      <div class="side-box" id="box-peer"><div class="cap">相手</div><canvas id="c-peer" width="60" height="120"></canvas></div>
     </div>
   </div>
   <div class="controls">
