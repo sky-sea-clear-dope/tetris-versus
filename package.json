@@ -1,0 +1,21 @@
+{
+  "name": "tetris-versus",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "友達と1対1で遊べる対戦テトリス（サーバー + スマホアプリ）",
+  "scripts": {
+    "test": "npm --prefix app run test && npm --prefix server run test && npm run sim && npm run test:web",
+    "test:web": "npm run build:web && node --test tools/webtest.mjs",
+    "sim": "esbuild tools/simulate.ts --bundle --platform=node --format=esm --outfile=.sim.mjs --external:node:* --external:ws && node --test .sim.mjs",
+    "build:web": "esbuild web/src/main.ts --bundle --format=iife --target=es2019 --outfile=docs/app.js --minify",
+    "server": "npm --prefix server start",
+    "app": "npm --prefix app start"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "jsdom": "^26.0.0",
+    "typescript": "^5.6.0",
+    "ws": "^8.18.0"
+  }
+}

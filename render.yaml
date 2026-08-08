@@ -1,0 +1,14 @@
+# Render にそのままデプロイするための設定。
+# リポジトリを繋いだあと Blueprint として読み込ませると、この内容で自動設定されます。
+services:
+  - type: web
+    name: tetris-versus-server
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
