@@ -123,6 +123,43 @@
     border-radius: 8px; padding: 20px; text-align: center;
   }
   .count { font-size: 76px; font-weight: 900; }
+
+  /* ---------- おじゃま到着カウントダウン ---------- */
+  .warn {
+    position: absolute; inset: 0; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; border-radius: 8px;
+  }
+  /* 盤面のふちが赤く脈打つ */
+  .warn::before {
+    content: ''; position: absolute; inset: 0; border-radius: 8px;
+    box-shadow: inset 0 0 0 3px var(--danger), inset 0 0 34px rgba(239,68,68,.5);
+    opacity: .5; animation: warnPulse 1s ease-in-out infinite;
+  }
+  .warn.urgent::before { animation-duration: .32s; }
+  @keyframes warnPulse { 50% { opacity: 1; } }
+  .warn-lines {
+    font-size: 13px; font-weight: 800; color: #fff; letter-spacing: 1px;
+    background: rgba(239,68,68,.92); padding: 3px 12px; border-radius: 999px;
+    text-shadow: 0 1px 2px rgba(0,0,0,.5);
+  }
+  .warn-num {
+    font-size: 86px; font-weight: 900; line-height: 1; color: #fff;
+    text-shadow: 0 0 18px rgba(239,68,68,.95), 0 3px 6px rgba(0,0,0,.7);
+    animation: warnPop .45s ease-out;
+  }
+  .warn.urgent .warn-num { color: #ffe4e4; animation: warnPop .3s ease-out; }
+  @keyframes warnPop { from { transform: scale(1.9); opacity: .15; } }
+  .warn-cap { font-size: 12px; color: #ffd7d7; font-weight: 700; letter-spacing: 1px; }
+  /* せり上がった瞬間の一撃 */
+  .shake { animation: shake .32s; }
+  @keyframes shake {
+    20% { transform: translate(-4px, 3px); }
+    45% { transform: translate(4px, -2px); }
+    70% { transform: translate(-3px, -3px); }
+  }
+  .gauge-cell.urgent { background: #fff; animation: blink .3s infinite; }
+  #btn-sound { font-size: 12px; padding: 2px 8px; border-radius: 8px; font-weight: 700; }
   .controls { flex: none; padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 8px; }
   .pad { display: flex; gap: 8px; }
   .pad > div { display: flex; gap: 8px; flex: 1; }
@@ -165,6 +202,7 @@
       ・ラインを消すと相手におじゃまブロックを送れます<br>
       ・T-Spin、連続消し（REN）、テトリスで威力アップ<br>
       ・相手から届いたおじゃまは、自分が消せば打ち消せます<br>
+      ・ただし4秒たつと問答無用でせり上がります（カウントダウンが出ます）<br>
       ・全消し（パーフェクトクリア）は特大の10段
     </div>
   </div>
@@ -186,7 +224,7 @@
 <section id="game" class="screen hidden">
   <div class="game-top">
     <span id="g-me">あなた</span>
-    <span id="g-lines">0 ライン</span>
+    <span><span id="g-lines">0 ライン</span> <button id="btn-sound" type="button">音 オン</button></span>
     <span id="g-peer">相手</span>
   </div>
   <div class="game-main">
@@ -196,6 +234,11 @@
     </div>
     <div class="board-wrap">
       <canvas id="c-board"></canvas>
+      <div id="warn" class="warn hidden">
+        <div id="warn-lines" class="warn-lines">おじゃま 0段</div>
+        <div id="warn-num" class="warn-num">4</div>
+        <div class="warn-cap">秒後にせり上がる</div>
+      </div>
       <div id="banner" class="banner hidden"></div>
       <div id="overlay" class="overlay hidden"></div>
     </div>
