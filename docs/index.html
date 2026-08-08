@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="対戦テトリス">
+<title>対戦テトリス</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.png">
+<style>
+  :root {
+    --bg: #0b1020;
+    --panel: #151d33;
+    --panel2: #1c2743;
+    --line: #26324f;
+    --text: #e7ecf7;
+    --muted: #8595b8;
+    --accent: #4f8cff;
+    --danger: #ef4444;
+    --ok: #22c55e;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    overscroll-behavior: none; touch-action: manipulation;
+    user-select: none; -webkit-user-select: none;
+  }
+  body { display: flex; flex-direction: column; }
+  .screen {
+    flex: 1; display: flex; flex-direction: column;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    min-height: 0;
+  }
+  .hidden { display: none !important; }
+
+  /* ---------- ホーム ---------- */
+  .home-inner {
+    flex: 1; overflow-y: auto; padding: 24px 20px 32px;
+    display: flex; flex-direction: column; gap: 16px;
+    max-width: 460px; margin: 0 auto; width: 100%;
+  }
+  h1 { font-size: 30px; margin: 8px 0 0; letter-spacing: 2px; }
+  .sub { color: var(--muted); font-size: 13px; margin: 0 0 8px; line-height: 1.7; }
+  label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; }
+  input {
+    width: 100%; padding: 14px; font-size: 17px;
+    background: var(--panel); color: var(--text);
+    border: 1px solid var(--line); border-radius: 12px; outline: none;
+    font-family: inherit;
+  }
+  input:focus { border-color: var(--accent); }
+  input.code { text-align: center; letter-spacing: 10px; font-size: 26px; font-weight: 700; text-transform: uppercase; }
+  button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    color: var(--text); background: var(--panel2);
+    border: 1px solid var(--line); border-radius: 12px;
+    padding: 15px; cursor: pointer;
+  }
+  button:active { background: #2c3f6b; }
+  button.primary { background: var(--accent); border-color: var(--accent); }
+  button.primary:active { background: #3d76e0; }
+  button:disabled { opacity: .45; }
+  button.link {
+    background: none; border: none; color: var(--muted);
+    font-size: 13px; font-weight: 400; padding: 6px; text-decoration: underline;
+  }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #64748b; flex: none; }
+  .dot.on { background: var(--ok); }
+  .dot.busy { background: #eab308; animation: blink 1s infinite; }
+  .dot.err { background: var(--danger); }
+  @keyframes blink { 50% { opacity: .25; } }
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+  .rules { font-size: 12px; color: var(--muted); line-height: 1.9; }
+
+  /* ---------- ロビー ---------- */
+  .lobby-inner {
+    flex: 1; display: flex; flex-direction: column; gap: 18px;
+    padding: 28px 20px; max-width: 460px; margin: 0 auto; width: 100%;
+    justify-content: center;
+  }
+  .code-big {
+    font-size: 56px; font-weight: 800; letter-spacing: 14px;
+    text-align: center; padding: 22px 0 22px 14px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+  }
+  .player {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; padding: 14px 16px; font-size: 16px;
+  }
+  .player .tag { font-size: 11px; color: var(--muted); }
+
+  /* ---------- ゲーム ---------- */
+  .game-top {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px; font-size: 12px; color: var(--muted); flex: none;
+  }
+  .game-main { flex: 1; display: flex; gap: 8px; padding: 0 8px; min-height: 0; justify-content: center; }
+  .board-wrap { position: relative; display: flex; align-items: center; }
+  canvas { display: block; image-rendering: auto; }
+  .side { display: flex; flex-direction: column; gap: 8px; width: 74px; flex: none; justify-content: center; }
+  .side-box { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 6px; }
+  .side-box .cap { font-size: 10px; color: var(--muted); text-align: center; margin-bottom: 3px; }
+  .gauge { display: flex; flex-direction: column-reverse; gap: 2px; height: 100%; }
+  .gauge-cell { height: 6px; border-radius: 2px; background: #f59e0b; }
+  .gauge-cell.hot { background: var(--danger); }
+  .banner {
+    position: absolute; left: 50%; top: 26%; transform: translateX(-50%);
+    background: rgba(15,23,42,.9); padding: 7px 14px; border-radius: 9px;
+    font-size: 15px; font-weight: 700; white-space: nowrap; pointer-events: none;
+  }
+  .overlay {
+    position: absolute; inset: 0; background: rgba(6,10,22,.94);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+    border-radius: 8px; padding: 20px; text-align: center;
+  }
+  .count { font-size: 76px; font-weight: 900; }
+  .controls { flex: none; padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 8px; }
+  .pad { display: flex; gap: 8px; }
+  .pad > div { display: flex; gap: 8px; flex: 1; }
+  .pad button { flex: 1; padding: 0; height: 58px; font-size: 22px; }
+  .wide { height: 54px !important; font-size: 16px !important; }
+</style>
+</head>
+<body>
+
+<!-- ============ ホーム ============ -->
+<section id="home" class="screen">
+  <div class="home-inner">
+    <h1>対戦テトリス</h1>
+    <p class="sub">友達と1対1。片方が部屋を作って、出てきた4文字のコードを相手に伝えるだけで始まります。</p>
+
+    <div>
+      <label for="name">あなたの名前</label>
+      <input id="name" maxlength="12" placeholder="いけだい" autocomplete="off">
+    </div>
+
+    <button id="btn-create" class="primary">部屋を作る</button>
+
+    <div class="card">
+      <label for="code">友達の部屋に入る</label>
+      <input id="code" class="code" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <div style="height:10px"></div>
+      <button id="btn-join" style="width:100%">参加する</button>
+    </div>
+
+    <div class="status"><span id="dot" class="dot"></span><span id="status-text">未接続</span></div>
+
+    <button id="btn-settings" class="link">サーバー設定</button>
+    <div id="settings" class="card hidden">
+      <label for="server">対戦サーバーのアドレス</label>
+      <input id="server" placeholder="wss://..." autocomplete="off" spellcheck="false">
+      <p class="sub" style="margin:10px 0 0">通常は変更不要です。無料サーバーは使われていないと眠るため、最初の接続に最大1分ほどかかることがあります。</p>
+    </div>
+
+    <div class="rules">
+      ・ラインを消すと相手におじゃまブロックを送れます<br>
+      ・T-Spin、連続消し（REN）、テトリスで威力アップ<br>
+      ・相手から届いたおじゃまは、自分が消せば打ち消せます<br>
+      ・全消し（パーフェクトクリア）は特大の10段
+    </div>
+  </div>
+</section>
+
+<!-- ============ ロビー ============ -->
+<section id="lobby" class="screen hidden">
+  <div class="lobby-inner">
+    <p class="sub" style="text-align:center;margin:0">このコードを相手に伝えてください</p>
+    <div id="lobby-code" class="code-big">----</div>
+    <div class="player"><span id="me-ready" class="dot"></span><div><div id="me-name">あなた</div><div class="tag">あなた</div></div></div>
+    <div class="player"><span id="peer-ready" class="dot"></span><div><div id="peer-name">待っています…</div><div class="tag">相手</div></div></div>
+    <button id="btn-ready" class="primary" disabled>準備完了</button>
+    <button id="btn-leave" class="link">部屋を出る</button>
+  </div>
+</section>
+
+<!-- ============ ゲーム ============ -->
+<section id="game" class="screen hidden">
+  <div class="game-top">
+    <span id="g-me">あなた</span>
+    <span id="g-lines">0 ライン</span>
+    <span id="g-peer">相手</span>
+  </div>
+  <div class="game-main">
+    <div class="side">
+      <div class="side-box"><div class="cap">HOLD</div><canvas id="c-hold" width="60" height="40"></canvas></div>
+      <div class="side-box" style="flex:1"><div class="cap">おじゃま</div><div id="gauge" class="gauge"></div></div>
+    </div>
+    <div class="board-wrap">
+      <canvas id="c-board"></canvas>
+      <div id="banner" class="banner hidden"></div>
+      <div id="overlay" class="overlay hidden"></div>
+    </div>
+    <div class="side">
+      <div class="side-box"><div class="cap">NEXT</div><canvas id="c-next" width="60" height="170"></canvas></div>
+      <div class="side-box"><div class="cap">相手</div><canvas id="c-peer" width="60" height="120"></canvas></div>
+    </div>
+  </div>
+  <div class="controls">
+    <div class="pad">
+      <div>
+        <button data-act="left">◀</button>
+        <button data-act="down">▼</button>
+        <button data-act="right">▶</button>
+      </div>
+      <div>
+        <button data-act="hold" style="font-size:13px">HOLD</button>
+        <button data-act="ccw">↺</button>
+        <button data-act="cw">↻</button>
+      </div>
+    </div>
+    <button data-act="drop" class="wide">ハードドロップ</button>
+  </div>
+</section>
+
+<script src="app.js"></script>
+</body>
+</html>
