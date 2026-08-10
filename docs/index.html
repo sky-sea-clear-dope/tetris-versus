@@ -56,10 +56,10 @@
     user-select: text; -webkit-user-select: text; -webkit-touch-callout: default;
   }
   input:focus { border-color: var(--accent); }
+  /* 部屋コードは数字4桁。text-transform は付けない（iPhoneで文字が二重に入る原因になる） */
   input.code {
-    text-align: center; font-size: 28px; font-weight: 700;
-    letter-spacing: 8px; padding-left: 22px; /* 字間のぶん右にずれるので左で相殺 */
-    text-transform: uppercase;
+    text-align: center; font-size: 30px; font-weight: 700;
+    letter-spacing: 10px; padding-left: 24px; /* 字間のぶん右にずれるので左で相殺 */
   }
   /* 名前欄の右に付く「消す」ボタン */
   .field { position: relative; }
@@ -192,7 +192,7 @@
 <section id="home" class="screen">
   <div class="home-inner">
     <h1>対戦テトリス</h1>
-    <p class="sub">友達と1対1。片方が部屋を作って、出てきた4文字のコードを相手に伝えるだけで始まります。</p>
+    <p class="sub">友達と1対1。片方が部屋を作って、出てきた数字4桁のコードを相手に伝えるだけで始まります。</p>
 
     <div>
       <label for="name">あなたの名前（いつでも変えられます）</label>
@@ -205,8 +205,8 @@
     <button id="btn-create" class="primary">部屋を作る</button>
 
     <div class="card">
-      <label for="code">友達の部屋に入る</label>
-      <input id="code" class="code" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" inputmode="text" enterkeyhint="go">
+      <label for="code">友達の部屋に入る（数字4桁）</label>
+      <input id="code" class="code" type="text" maxlength="4" placeholder="0000" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go">
       <div style="height:10px"></div>
       <button id="btn-join" style="width:100%">参加する</button>
     </div>
