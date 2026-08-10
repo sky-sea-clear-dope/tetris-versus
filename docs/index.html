@@ -52,9 +52,23 @@
     background: var(--panel); color: var(--text);
     border: 1px solid var(--line); border-radius: 12px; outline: none;
     font-family: inherit;
+    /* 本文は選択禁止にしているが、入力欄だけは文字を選べないと編集できない */
+    user-select: text; -webkit-user-select: text; -webkit-touch-callout: default;
   }
   input:focus { border-color: var(--accent); }
-  input.code { text-align: center; letter-spacing: 10px; font-size: 26px; font-weight: 700; text-transform: uppercase; }
+  input.code {
+    text-align: center; font-size: 28px; font-weight: 700;
+    letter-spacing: 8px; padding-left: 22px; /* 字間のぶん右にずれるので左で相殺 */
+    text-transform: uppercase;
+  }
+  /* 名前欄の右に付く「消す」ボタン */
+  .field { position: relative; }
+  .field input { padding-right: 46px; }
+  .field .clear {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--muted);
+    font-size: 20px; font-weight: 400; padding: 8px 10px; line-height: 1;
+  }
   button {
     font-family: inherit; font-size: 16px; font-weight: 700;
     color: var(--text); background: var(--panel2);
@@ -125,32 +139,32 @@
   .count { font-size: 76px; font-weight: 900; }
 
   /* ---------- おじゃま到着カウントダウン ---------- */
-  .warn {
-    position: absolute; inset: 0; pointer-events: none;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 2px; border-radius: 8px;
-  }
+  /* 盤面いっぱいに広がるのは赤いふちの点滅だけ。数字は右上のすみに小さく出す。 */
+  .warn { position: absolute; inset: 0; pointer-events: none; border-radius: 8px; }
   /* 盤面のふちが赤く脈打つ */
   .warn::before {
     content: ''; position: absolute; inset: 0; border-radius: 8px;
-    box-shadow: inset 0 0 0 3px var(--danger), inset 0 0 34px rgba(239,68,68,.5);
+    box-shadow: inset 0 0 0 3px var(--danger), inset 0 0 26px rgba(239,68,68,.42);
     opacity: .5; animation: warnPulse 1s ease-in-out infinite;
   }
   .warn.urgent::before { animation-duration: .32s; }
   @keyframes warnPulse { 50% { opacity: 1; } }
-  .warn-lines {
-    font-size: 13px; font-weight: 800; color: #fff; letter-spacing: 1px;
-    background: rgba(239,68,68,.92); padding: 3px 12px; border-radius: 999px;
-    text-shadow: 0 1px 2px rgba(0,0,0,.5);
+  .warn-badge {
+    position: absolute; top: 5px; right: 5px;
+    display: flex; align-items: baseline; gap: 4px;
+    background: rgba(220,38,38,.95); color: #fff;
+    padding: 3px 9px 4px; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.55);
   }
+  .warn-lines { font-size: 11px; font-weight: 800; letter-spacing: .5px; }
   .warn-num {
-    font-size: 86px; font-weight: 900; line-height: 1; color: #fff;
-    text-shadow: 0 0 18px rgba(239,68,68,.95), 0 3px 6px rgba(0,0,0,.7);
-    animation: warnPop .45s ease-out;
+    font-size: 20px; font-weight: 900; line-height: 1;
+    animation: warnPop .4s ease-out;
   }
-  .warn.urgent .warn-num { color: #ffe4e4; animation: warnPop .3s ease-out; }
-  @keyframes warnPop { from { transform: scale(1.9); opacity: .15; } }
-  .warn-cap { font-size: 12px; color: #ffd7d7; font-weight: 700; letter-spacing: 1px; }
+  .warn-cap { font-size: 10px; font-weight: 700; opacity: .85; }
+  .warn.urgent .warn-badge { background: #fff; color: #b91c1c; }
+  .warn.urgent .warn-num { animation: warnPop .28s ease-out; }
+  @keyframes warnPop { from { transform: scale(1.7); opacity: .2; } }
   /* せり上がった瞬間の一撃 */
   .shake { animation: shake .32s; }
   @keyframes shake {
@@ -160,11 +174,16 @@
   }
   .gauge-cell.urgent { background: #fff; animation: blink .3s infinite; }
   #btn-sound { font-size: 12px; padding: 2px 8px; border-radius: 8px; font-weight: 700; }
-  .controls { flex: none; padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 8px; }
-  .pad { display: flex; gap: 8px; }
-  .pad > div { display: flex; gap: 8px; flex: 1; }
-  .pad button { flex: 1; padding: 0; height: 58px; font-size: 22px; }
-  .wide { height: 54px !important; font-size: 16px !important; }
+  /* 操作ボタン。左手＝移動、右手＝回転。真ん中を大きく空けて押し間違いを防ぐ。 */
+  .controls { flex: none; padding: 10px 10px calc(12px + env(safe-area-inset-bottom)); }
+  .pad { display: flex; gap: 26px; }
+  .pad-left { display: flex; gap: 10px; flex: 3; }
+  .pad-right { display: flex; gap: 10px; flex: 2; }
+  .pad button { flex: 1; padding: 0; height: 74px; font-size: 26px; border-radius: 16px; }
+  .pad button[data-act="down"] { font-size: 22px; }
+  .pad-hint { display: flex; gap: 26px; margin-top: 6px; font-size: 10px; color: var(--muted); }
+  .pad-hint > span { flex: 3; text-align: center; }
+  .pad-hint > span + span { flex: 2; }
 </style>
 </head>
 <body>
@@ -176,15 +195,18 @@
     <p class="sub">友達と1対1。片方が部屋を作って、出てきた4文字のコードを相手に伝えるだけで始まります。</p>
 
     <div>
-      <label for="name">あなたの名前</label>
-      <input id="name" maxlength="12" placeholder="いけだい" autocomplete="off">
+      <label for="name">あなたの名前（いつでも変えられます）</label>
+      <div class="field">
+        <input id="name" maxlength="12" placeholder="いけだい" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done">
+        <button id="btn-name-clear" class="clear" type="button" aria-label="名前を消す">✕</button>
+      </div>
     </div>
 
     <button id="btn-create" class="primary">部屋を作る</button>
 
     <div class="card">
       <label for="code">友達の部屋に入る</label>
-      <input id="code" class="code" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <input id="code" class="code" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" inputmode="text" enterkeyhint="go">
       <div style="height:10px"></div>
       <button id="btn-join" style="width:100%">参加する</button>
     </div>
@@ -210,7 +232,8 @@
       ・相手から届いたおじゃまは、自分が消せば打ち消せます<br>
       ・ただし4秒たつと問答無用でせり上がります（カウントダウンが出ます）<br>
       ・全消し（パーフェクトクリア）は特大の10段<br>
-      ・「ひとりで遊ぶ」は10ライン消すごとに落下が速くなるマラソンです
+      ・「ひとりで遊ぶ」は10ライン消すごとに落下が速くなるマラソンです<br>
+      ・操作は左手が移動（◀ ▼ ▶）、右手が回転（↺ ↻）です
     </div>
   </div>
 </section>
@@ -236,15 +259,16 @@
   </div>
   <div class="game-main">
     <div class="side">
-      <div class="side-box"><div class="cap">HOLD</div><canvas id="c-hold" width="60" height="40"></canvas></div>
       <div class="side-box" id="box-gauge" style="flex:1"><div class="cap">おじゃま</div><div id="gauge" class="gauge"></div></div>
     </div>
     <div class="board-wrap">
       <canvas id="c-board"></canvas>
       <div id="warn" class="warn hidden">
-        <div id="warn-lines" class="warn-lines">おじゃま 0段</div>
-        <div id="warn-num" class="warn-num">4</div>
-        <div class="warn-cap">秒後にせり上がる</div>
+        <div class="warn-badge">
+          <span id="warn-lines" class="warn-lines">0段</span>
+          <span id="warn-num" class="warn-num">4</span>
+          <span class="warn-cap">秒</span>
+        </div>
       </div>
       <div id="banner" class="banner hidden"></div>
       <div id="overlay" class="overlay hidden"></div>
@@ -256,18 +280,17 @@
   </div>
   <div class="controls">
     <div class="pad">
-      <div>
+      <div class="pad-left">
         <button data-act="left">◀</button>
         <button data-act="down">▼</button>
         <button data-act="right">▶</button>
       </div>
-      <div>
-        <button data-act="hold" style="font-size:13px">HOLD</button>
+      <div class="pad-right">
         <button data-act="ccw">↺</button>
         <button data-act="cw">↻</button>
       </div>
     </div>
-    <button data-act="drop" class="wide">ハードドロップ</button>
+    <div class="pad-hint"><span>うごかす（▼は押しっぱなしで早く落ちる）</span><span>まわす</span></div>
   </div>
 </section>
 
