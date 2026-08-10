@@ -9,7 +9,9 @@ const PORT = process.env.PORT || 8080;
 /** @type {Map<string, Room>} */
 const rooms = new Map();
 
-const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 紛らわしい文字(I,O,0,1)は除外
+// 部屋コードは数字だけ。スマホで数字キーパッドが出るので打ち間違いが起きにくく、
+// 口で友達に伝えるのも楽（アルファベットだとiPhoneの自動大文字化で入力が乱れた）。
+const CODE_CHARS = '0123456789';
 
 function makeCode() {
   let code;
