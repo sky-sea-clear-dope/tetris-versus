@@ -176,7 +176,10 @@
     70% { transform: translate(-3px, -3px); }
   }
   .gauge-cell.urgent { background: #fff; animation: blink .3s infinite; }
-  #btn-sound { font-size: 12px; padding: 2px 8px; border-radius: 8px; font-weight: 700; }
+  #btn-sound, #btn-menu { font-size: 12px; padding: 2px 8px; border-radius: 8px; font-weight: 700; }
+  /* メニューに戻るボタン。押し間違えると遊びが中断してしまうので、
+     操作ボタンから遠い左上のすみに、目立たない色で置く。 */
+  #btn-menu { background: transparent; border: 1px solid var(--line); color: var(--muted); }
   /* 操作ボタン。左手＝移動、右手＝回転。真ん中を大きく空けて押し間違いを防ぐ。 */
   .controls { flex: none; padding: 10px 10px calc(12px + env(safe-area-inset-bottom)); }
   .pad { display: flex; gap: 26px; }
@@ -262,7 +265,7 @@
 <!-- ============ ゲーム ============ -->
 <section id="game" class="screen hidden">
   <div class="game-top">
-    <span id="g-me">あなた</span>
+    <span><button id="btn-menu" type="button">≡ メニュー</button> <span id="g-me">あなた</span></span>
     <span><span id="g-lines">0 ライン</span> <button id="btn-sound" type="button">音 オン</button></span>
     <span id="g-peer">相手</span>
   </div>
