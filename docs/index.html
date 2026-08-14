@@ -105,12 +105,15 @@
     text-align: center; padding: 22px 0 22px 14px;
     background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
   }
+  .players { display: flex; flex-direction: column; gap: 8px; }
   .player {
     display: flex; align-items: center; gap: 12px;
     background: var(--panel); border: 1px solid var(--line);
     border-radius: 12px; padding: 14px 16px; font-size: 16px;
   }
   .player .tag { font-size: 11px; color: var(--muted); }
+  /* まだ誰も来ていない席 */
+  .player.empty { opacity: .45; border-style: dashed; }
 
   /* ---------- ゲーム ---------- */
   /* ゲーム画面は指の動きをブラウザに一切渡さない。
@@ -176,6 +179,22 @@
     70% { transform: translate(-3px, -3px); }
   }
   .gauge-cell.urgent { background: #fff; animation: blink .3s infinite; }
+
+  /* ---------- 相手の盤面（最大3つ） ---------- */
+  .peers-mini { display: flex; flex-direction: column; gap: 4px; height: calc(100% - 16px); }
+  .peer { display: flex; flex-direction: column; align-items: center; gap: 1px; flex: 1; min-height: 0; }
+  .peer canvas { display: block; border-radius: 3px; }
+  .peer .nm {
+    font-size: 9px; color: var(--muted); line-height: 1.2;
+    max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  /* 倒れた人は薄く */
+  .peer.out { opacity: .35; }
+  /* いま自分がおじゃまを送っている相手 */
+  .peer.aim canvas { box-shadow: 0 0 0 2px var(--accent); }
+  /* 自分をねらってきている相手 */
+  .peer.danger canvas { box-shadow: 0 0 0 2px var(--danger); }
+  .peer.danger .nm { color: #fca5a5; }
   #btn-sound, #btn-menu { font-size: 12px; padding: 2px 8px; border-radius: 8px; font-weight: 700; }
   /* メニューに戻るボタン。押し間違えると遊びが中断してしまうので、
      操作ボタンから遠い左上のすみに、目立たない色で置く。 */
@@ -198,7 +217,7 @@
 <section id="home" class="screen">
   <div class="home-inner">
     <h1>対戦テトリス</h1>
-    <p class="sub">友達と1対1。片方が部屋を作って、出てきた数字4桁のコードを相手に伝えるだけで始まります。</p>
+    <p class="sub">友達と2〜4人で。ひとりが部屋を作って、出てきた数字4桁のコードをみんなに伝えるだけで始まります。</p>
 
     <div>
       <label for="name">あなたの名前（いつでも変えられます）</label>
@@ -240,6 +259,10 @@
 
     <div class="rules">
       ・ラインを消すと相手におじゃまブロックを送れます<br>
+      ・3人以上のときは、自分を最後にやっつけた相手に送り返します（しかえし）<br>
+      ・まだ誰にもやられていないときは、生きている相手からランダムに選びます<br>
+      ・人数が多いほど、1回に送る段数はひかえめになります<br>
+      ・倒れても最後の1人が決まるまで見ていられます<br>
       ・T-Spin、連続消し（REN）、テトリスで威力アップ<br>
       ・相手から届いたおじゃまは、自分が消せば打ち消せます<br>
       ・ただし4秒たつと問答無用でせり上がります（カウントダウンが出ます）<br>
@@ -253,11 +276,11 @@
 <!-- ============ ロビー ============ -->
 <section id="lobby" class="screen hidden">
   <div class="lobby-inner">
-    <p class="sub" style="text-align:center;margin:0">このコードを相手に伝えてください</p>
+    <p class="sub" style="text-align:center;margin:0">このコードを相手に伝えてください（2〜4人）</p>
     <div id="lobby-code" class="code-big">----</div>
-    <div class="player"><span id="me-ready" class="dot"></span><div><div id="me-name">あなた</div><div class="tag">あなた</div></div></div>
-    <div class="player"><span id="peer-ready" class="dot"></span><div><div id="peer-name">待っています…</div><div class="tag">相手</div></div></div>
-    <button id="btn-ready" class="primary" disabled>準備完了</button>
+    <div id="lobby-players" class="players"></div>
+    <p class="sub" id="lobby-note" style="text-align:center;margin:0"></p>
+    <button id="btn-begin" class="primary" disabled>はじめる</button>
     <button id="btn-leave" class="link">部屋を出る</button>
   </div>
 </section>
@@ -287,7 +310,7 @@
     </div>
     <div class="side">
       <div class="side-box"><div class="cap">NEXT</div><canvas id="c-next" width="60" height="170"></canvas></div>
-      <div class="side-box" id="box-peer"><div class="cap">相手</div><canvas id="c-peer" width="60" height="120"></canvas></div>
+      <div class="side-box" id="box-peer" style="flex:1;min-height:0"><div class="cap">あいて</div><div id="peers" class="peers-mini"></div></div>
     </div>
   </div>
   <div class="controls">
